@@ -1,0 +1,7 @@
+# Ignore LaTeX output
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+*.synctex.gz
