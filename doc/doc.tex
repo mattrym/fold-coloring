@@ -20,6 +20,7 @@
 \usepackage{subcaption}
 \renewcommand{\familydefault}{\sfdefault}
 \setlength{\parindent}{0pt}
+\newtheorem{definition}{Definicja}
 \newtheorem{theorem}{Twierdzenie}
 \newtheorem{lemma}{Lemat}
 \newtheorem{invariant}{Niezmiennik}
@@ -53,13 +54,67 @@
 		\end{center}  
 	\end{titlepage}
 	
-	{\fontsize{13.5}{12}\selectfont
-		\tableofcontents
-		\vspace{1cm}
-		{\renewcommand{\arraystretch}{2.0}
-		
-	}}
+	%{\fontsize{13.5}{12}\selectfont
+	%	\tableofcontents
+	%	\vspace{1cm}
+	%	{\renewcommand{\arraystretch}{2.0}
+	%	
+	%}}
+	%
+	%\newpage
 	
-	\newpage
+	\section{Abstrakt}
+	
+	Przedmiotem projektu realizowanego w ramach przedmiotu Chromatyczna Teoria Grafów przez autorów tego dokumentu jest analiza problemu kolorowania warstwowego grafu. Zespół przygotuje, zaimplementuje oraz przetestuje działanie trzech algorytmy, które będą starały się pokolorować grafy wielowarstwowe w lepszy sposób niż naiwny algorytm duplikacji koloru na wiele warstw. W dokumentacji przedstawi teoretyczny opis problemu wraz z proponowanymi algorytmami, a następnie opisze sposób działania programu i przedstawi raport z testów na wybranych rodzajach grafów, podsumowując to wszystko wnioskami płynącymi z obserwacji.
+	
+	\section{Opis teoretyczny problemu}
+	
+	\begin{definition}\label{def:1}
+		\textbf{Kolorowaniem $p$-warstwowym} grafu $G$ nazywamy takie przyporządkowanie $c: v \rightarrow 2^{C}$, gdzie każdemu wierzchołkowi $v \in V(G)$ przypisujemy podzbiór $C'$ zbioru kolorów $C$ taki, że $|C'| = p$.
+	\end{definition}
+
+	\begin{definition}\label{def:2}
+		Kolorowanie $p$-warstwowe grafu $G$ nazywamy \textbf{właściwym (poprawnym, optymalnym)}, jeżeli dla dowolnego $v \in V(G)$ przecięcia zbioru kolorów tego wierzchołka i kolorów każdego jego sąsiada są zbiorami pustymi, tzn.
+		\[ \forall u, v \in V(G) \quad \left\{u, v\right\} \in E(G) \implies c(u) \cap c(v) = \emptyset \]
+	\end{definition}
+
+	Ogólnie rzecz ujmując, kolorowanie wielowarstwowe grafu jest rozszerzeniem zwykłego kolorowania grafu na wiele wymiarów. Kolorowanie jednowarstwowe jest tożsame z klasyczną definicją kolorowania wierzchołkowego grafu.
+	
+	\begin{definition}
+		\textbf{$p$-warstwową liczbą chromatyczną} grafu $G$ nazywamy najmniejsze $q$ takie, że istnieje poprawne $p$-warstwowe pokolorowanie grafu $G$ używające $q$ kolorów.\\
+		\textbf{Chromatycznym współczynnikiem $p$-warstwowym} grafu $G$ nazywamy stosunek $p$-warstwowej liczby chromatycznej do liczby warstw.
+	\end{definition}
+
+	Okazuje się, że $\chi_{p}G \leq p \chi G$. Gdy weźmiemy bowiem dobre $\chi G$-pokolorowanie $c: V \rightarrow C$ grafu $G$ i dla każdego $v \in V$ przypiszemy mu $c'(v) = \left\{r \cdot |C| + c(v): r \in \left\{1,...,p\right\}\right\}$, to uzyskamy $p \chi G$-pokolorowanie $p$-warstwowe.
+	\\~\\
+	Przykładem grafu, który dla którego zachodzi ostra nierówność, jest nieparzysty cykl o wielkości przekraczającej trzy wierzchołki. 
+	
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}
+			\node[circle, draw, fill=none] (1) [label=south west:{1,2}] at (0,0) {};
+			\node[circle, draw, fill=none] (2) [label=south east:{3,4}] at (4,0) {};
+			\node[circle, draw, fill=none] (3) [label=south east:{5,1}] at (5,4) {};
+			\node[circle, draw, fill=none] (4) [label=north:{2,3}] at (2,6) {};
+			\node[circle, draw, fill=none] (5) [label=south west:{4,5}] at (-1,4) {};
+			\draw (1) -- (2) -- (3) -- (4) -- (5) -- (1);
+		\end{tikzpicture}
+		\caption{Przykład 2,5-pokolorowania 2-warstwowego dla grafu $C_{5}$}
+	\end{figure}
+	
+	Problem polega na znalezieniu takiego $p$-warstwowego pokolorowania dla zadanego $p$, aby dla pewnych grafów (takich, gdzie jest to możliwe) $\chi_{p}G < p \chi G$.
+
+	\vfill
+	
+	\begin{thebibliography}{0}
+		\bibitem{kubale-article}
+		Marek Kubale, \textit{Analiza efektywności algorytmów kolorowania grafów}, PTM 1980\\
+		\url{https://wydawnictwa.ptm.org.pl/index.php/matematyka-stosowana/article/viewFile/1531/1457}\\
+		\textit{(dostęp: \today)}
+		
+		\bibitem{kubale-book}
+		Marek Kubale, \textit{text}
+	\end{thebibliography}
+	
 
 \end{document}
