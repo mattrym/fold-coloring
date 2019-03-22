@@ -85,9 +85,9 @@
 		\textbf{Chromatycznym współczynnikiem $p$-warstwowym} grafu $G$ nazywamy stosunek $p$-warstwowej liczby chromatycznej do liczby warstw.
 	\end{definition}
 
-	Okazuje się, że $\chi_{p}G \leq p \chi G$. Gdy weźmiemy bowiem dobre $\chi G$-pokolorowanie $c: V \rightarrow C$ grafu $G$ i dla każdego $v \in V$ przypiszemy mu $c'(v) = \left\{r \cdot |C| + c(v): r \in \left\{1,...,p\right\}\right\}$, to uzyskamy $p \chi G$-pokolorowanie $p$-warstwowe.
+	Okazuje się, że $\chi_{p}G \leq p \chi G$. Gdy weźmiemy bowiem dobre $\chi G$-pokolorowanie $c: V \rightarrow C$ grafu $G$ i dla każdego $v \in V$ przypiszemy mu $c'(v) = \left\{r \cdot |C| + c(v): r \in \left\{1,...,p\right\}\right\}$, to uzyskamy $p \chi G$-pokolorowanie $p$-warstwowe. Nazwijmy je pokolorowaniem $p$-warstwowym grafu $G$ \textbf{równoległym do klasycznego}.
 	\\~\\
-	Przykładem grafu, który dla którego zachodzi ostra nierówność, jest nieparzysty cykl o wielkości przekraczającej trzy wierzchołki. 
+	Przykładem grafu, który dla którego zachodzi ostra nierówność, jest nieparzysty cykl o wielkości przekraczającej trzy wierzchołki. Takie kolorowanie będziemy nazywać \textbf{lepszym od klasycznego}.
 	
 	\begin{figure}[H]
 		\centering
@@ -103,6 +103,51 @@
 	\end{figure}
 	
 	Problem polega na znalezieniu takiego $p$-warstwowego pokolorowania dla zadanego $p$, aby dla pewnych grafów (takich, gdzie jest to możliwe) $\chi_{p}G < p \chi G$.
+	
+	\section{Proponowane algorytmy}
+	
+	Ponieważ problem znalezienia $p$-warstwowego grafu jest NP-trudny (można to wykazać, rozwijając graf warstwowo, gdzie każdy wierzchołek tworzy $p$-krotną klikę, zachowując połączenia z wierzchołkami w każdej z warstw), nie możemy znaleźć takiego pokolorowania w czasie wielomianowym. Zespół skupi się na poszukiwaniu algorytmu aproksymacyjnego, który przy zastosowaniu odpowiedniego podejścia do problemu, a być może pewnych heurystyk, będzie w stanie osiągać rezultat dla niektórych grafów.
+	\\~\\
+	Wspólnym mianownikiem tych algorytmów powinna być troska, aby starać się kolorować "chaotycznie", tzn. nie powtarzać tych samych zbiorów kolorów w wierzchołkach niezależnych. Taki układ może nas potem zmusić do użycia większej liczby kolorów, a w efekcie uzyskamy pokolorowanie na $p \cdot \chi G$ kolorów.
+	
+	\subsection{Zmodyfikowany algorytm AMIS}
+	
+	Algorytm AMIS (\textit{ang. approximately maximum independent set}) jest jednym z efektywniejszych algorytmów wielomianowych kolorowania grafu. W klasycznym problemie, polega on na wyborze spośród niepokolorowanych wierzchołków zbioru niezależnego i pokolorowanie go na nowy kolor. \\~\\
+	Algorytm można byłoby zaaplikować bez większych zmian (dopóty wierzchołek uznajemy za niepokolorowany, dopóki nie posiada zbioru $p$ kolorów przypisanych do niego). Istnieje jednak ryzyko, że wybierając te same zbiory niezależne w kolejnych iteracjach algorytmu znajdowania zachłannego zbiorów niezależnych, uzyskalibyśmy pokolorowanie równoległe do klasycznego. Zależy nam zatem, aby w kolejnych iteracjach zbiory niezależne jednocześnie  nie były tożsame oraz nie były rozłączne. \\~\\
+	Zaproponowany algorytm będzie korzystał ze zoptymalizowanej wersji algorytmu GIS (\textit{ang. greedy independent sets}), w którym zamiast wyboru jednego wierzchołka, będziemy wybierać dla każdego wierzchołka, czy powinien się on znaleźć w nowym zbiorze wierzchołków niezależnych. Będziemy również pamiętać dla każdego wierzchołka, ile razy znalazł się on już w zbiorze niezależnym. Po wyborze wierzchołków do naszego zbioru niezależnego, będziemy analizować wszystkie krawędzie między kandydatami i wyrzucać jeden z wierzchołków. Będzie to wierzchołek, który znalazł się więcej lub mniej razy w zbiorze niezależnym (wyboru dokonujemy na zmianę).
+
+	\subsection{Zmodyfikowany algorytm DSATUR}
+	
+	Algorytm DSATUR należy do rodziny algorytmów  W klasycznym problemie, polega on na wyborze spośród niepokolorowanych wierzchołków zbioru niezależnego i pokolorowanie go na nowy kolor. Zespół postanowił nieco zmodyfikować ten algorytm i zbadać jego działanie dla problemu kolorowania wielowarstwowego.
+	\\~\\
+	Saturację w klasycznej wersji tego algorytmu traktowaliśmy jako liczbę kolorów "zakazanych", tzn. ilość sąsiednich wierzchołków już pokolorowanych. Aby algorytm działał poprawnie dla wielu warstw, jednocześnie uwzględniając kolory znajdujące się u sąsiadów oraz w wierzchołku, należy zdefiniować nowy porządek. 
+	\\~\\
+	W celu analizy problemu, możemy rozpatrywać saturację wielorako; zdefiniujmy:
+	\begin{itemize}
+		\item saturację zewnętrzną, będącą ilością unikalnych kolorów użytych do pokolorowania wierzchołków sąsiednich, tzn.
+		\[S^{OUT}_{G}(v) = \left|\bigcup_{u \in N_{G}(v)} c(u)\right|\]
+		\item saturację wewnętrzną, będącą ilością kolorów użytych do pokolorowania wierzchołka, tzn.
+		\[S^{IN}_{G}(v) = |c(v)|\]
+		\item saturację całkowitą, będącą ilością unikalnych kolorów użytych do pokolorowania wierzchołków sąsiednich, tzn.
+		\[S_{G}(v) = \left|\left(\bigcup_{u \in N_{G}(v)} c(u) \right) \cup c(v)\right|\]
+	\end{itemize}
+	Ponieważ $\forall u,v \in V(G) \quad {u, v} \in E(G) \implies c(u) \cap c(v) = \emptyset$ dla poprawnego $p$-warstwowego pokolorowania $c$ grafu $G$, mamy $S_{G}(v) = S^{OUT}_{G}(v) + S^{IN}_{G}(v)$. 
+	\\~\\
+	W każdym przypadku saturacją będzie saturacja całkowita i po niej będziemy w pierwszej kolejności sortować. W razie remisów wybieramy wierzchołek o większej saturacji wewnętrznej, gdyż później, gdy jego sąsiedzi mogą dostać kolejne kolory i będzie go ciężej pokolorować.
+
+	\subsection{Trzeci algorytm}
+	
+	\section{Założenia techniczne}
+	
+	W wyborze języka, w którym zostanie stworzony program, zespół kierował się prostotą i przejrzystością implementacji, aby móc skupić się na teoretycznej części problemu. Ostatecznie, program zostanie napisany w języku Python - jest to bardzo prosty język, używany powszechnie do analizy złożonych algorytmów, posiadający duże wsparcie społeczności, bindingi do biblioteki graphviz (za pomocą której zespół chce zwizualizować wyniki działania algorytmów).
+	\\~\\
+	Projekt będzie obejmował:
+	\begin{itemize}
+		\item interfejs użytkownika (parser wejścia, komunikaty itp.)
+		\item implementację wyżej wymienionych algorytmów 
+		\item prezentację wyniku (wyjście tekstowe + wizualizacja za pomocą biblioteki graphviz)
+		\item przykładowe benchmarki testujące skuteczność oraz czas wykonania na wybranych grafach
+	\end{itemize}
 
 	\vfill
 	
@@ -113,7 +158,7 @@
 		\textit{(dostęp: \today)}
 		
 		\bibitem{kubale-book}
-		Marek Kubale, \textit{text}
+		Marek Kubale, \textit{Optymalizacja dyskretna. Modele i metody kolorownia grafów}, WNT 2002
 	\end{thebibliography}
 	
 
