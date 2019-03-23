@@ -54,14 +54,13 @@
 		\end{center}  
 	\end{titlepage}
 	
-	%{\fontsize{13.5}{12}\selectfont
-	%	\tableofcontents
-	%	\vspace{1cm}
-	%	{\renewcommand{\arraystretch}{2.0}
-	%	
-	%}}
-	%
-	%\newpage
+	{\fontsize{13.5}{12}\selectfont
+		\tableofcontents
+		\vspace{1cm}
+		{\renewcommand{\arraystretch}{2.0}
+		
+	}}
+	
 	
 	\section{Abstrakt}
 	
@@ -115,12 +114,65 @@
 	Algorytm AMIS (\textit{ang. approximately maximum independent set}) jest jednym z efektywniejszych algorytmów wielomianowych kolorowania grafu. W klasycznym problemie, polega on na wyborze spośród niepokolorowanych wierzchołków zbioru niezależnego i pokolorowanie go na nowy kolor. \\~\\
 	Algorytm można byłoby zaaplikować bez większych zmian (dopóty wierzchołek uznajemy za niepokolorowany, dopóki nie posiada zbioru $p$ kolorów przypisanych do niego). Istnieje jednak ryzyko, że wybierając te same zbiory niezależne w kolejnych iteracjach algorytmu znajdowania zachłannego zbiorów niezależnych, uzyskalibyśmy pokolorowanie równoległe do klasycznego. Zależy nam zatem, aby w kolejnych iteracjach zbiory niezależne jednocześnie  nie były tożsame oraz nie były rozłączne. \\~\\
 	Zaproponowany algorytm będzie korzystał ze zoptymalizowanej wersji algorytmu GIS (\textit{ang. greedy independent sets}), w którym zamiast wyboru jednego wierzchołka, będziemy wybierać dla każdego wierzchołka, czy powinien się on znaleźć w nowym zbiorze wierzchołków niezależnych. Będziemy również pamiętać dla każdego wierzchołka, ile razy znalazł się on już w zbiorze niezależnym. Po wyborze wierzchołków do naszego zbioru niezależnego, będziemy analizować wszystkie krawędzie między kandydatami i wyrzucać jeden z wierzchołków. Będzie to wierzchołek, który znalazł się więcej lub mniej razy w zbiorze niezależnym (wyboru dokonujemy na zmianę).
+	
+	\subsubsection{Pseudokod}
+	
+	\begin{algorithmic}
+		\State \textbf{Wejście:} graf $G$ i tablica wystąpień w zbiorach niezależnych wierzchołków $f$
+		\\
+		\Function {GreedyIndependentSet}{$G$, $f$}
+			\State $I \coloneqq \varnothing$
+			\State old $\coloneqq true$
+			\\
+			\ForAll{$v \in V(G)$}
+				\If{$unif(0, 1) \leq \deg_{G}^{-1} v$}
+					\State $I \coloneqq I \cup \left\{v\right\}$
+				\EndIf
+			\EndFor
+			\ForAll{$\left\{u, v\right\} \in E(G)$}
+				\If{$u,v \in I$}
+					\If{$f(u) \leq f(v) \, \iff $ old}
+						\State $I \coloneqq I - \left\{u\right\}$
+					\Else
+						\State $I \coloneqq I - \left\{v\right\}$
+					\EndIf
+					\State old $\coloneqq \neg$ old
+				\EndIf
+			\EndFor
+			\State \Return $I \, \cup \, $ \Call {GreedyIndependentSet}{$G[V(G) - I]$, $f$}
+		\EndFunction
+	\end{algorithmic}
+	
+	\begin{algorithmic}
+		\State \textbf{Wejście:} graf $G$
+		\\
+		\Function {Color}{$G$}
+			\State colored $\coloneqq 0$
+			\State color $\coloneqq 1$
+			\State $c \coloneqq \left[\right]$
+			\State $f \coloneqq \left[\right]$
+			\\
+			\ForAll{$v \in V(G)$}
+				\State $c(v) \coloneqq \varnothing$
+				\State $f(v) \coloneqq 0$
+			\EndFor
+			\While{colored $< p \cdot |V(G)|$}
+				\State $I \coloneqq $ \Call {GreedyIndependentSet}{$G\left[\left\{v \in V(G) : |c(v)| < p \right\}\right]$, $f$}
+				\ForAll{$v \in I$}
+					\State $c(v) \coloneqq c(v) \cup \left\{ \text{color} \right\}$
+					\State $f(v) \coloneqq f(v) + 1$
+					\State colored $\coloneqq$ colored $ + 1$
+				\EndFor
+			\EndWhile
+			\State \Return $(c, \text{color})$
+		\EndFunction
+	\end{algorithmic}
 
 	\subsection{Zmodyfikowany algorytm DSATUR}
 	
-	Algorytm DSATUR należy do rodziny algorytmów  W klasycznym problemie, polega on na wyborze spośród niepokolorowanych wierzchołków zbioru niezależnego i pokolorowanie go na nowy kolor. Zespół postanowił nieco zmodyfikować ten algorytm i zbadać jego działanie dla problemu kolorowania wielowarstwowego.
+	Algorytm DSATUR należy do rodziny algorytmów sekwencyjnych. W klasycznym problemie, polega on na wyborze spośród niepokolorowanych wierzchołków zbioru niezależnego i pokolorowanie go na nowy kolor. Zespół postanowił nieco zmodyfikować ten algorytm i zbadać jego działanie dla problemu kolorowania wielowarstwowego.
 	\\~\\
-	Saturację w klasycznej wersji tego algorytmu traktowaliśmy jako liczbę kolorów "zakazanych", tzn. ilość sąsiednich wierzchołków już pokolorowanych. Aby algorytm działał poprawnie dla wielu warstw, jednocześnie uwzględniając kolory znajdujące się u sąsiadów oraz w wierzchołku, należy zdefiniować nowy porządek. 
+	Saturację w klasycznej wersji tego algorytmu traktowaliśmy jako liczbę unikalnych kolorów w sąsiednich pokolorowanych wierzchołkach. Aby algorytm działał dla wielu warstw, jednocześnie uwzględniając kolory znajdujące się u sąsiadów oraz w wierzchołku, należy zdefiniować nowy porządek. 
 	\\~\\
 	W celu analizy problemu, możemy rozpatrywać saturację wielorako; zdefiniujmy:
 	\begin{itemize}
@@ -135,11 +187,109 @@
 	\\~\\
 	W każdym przypadku saturacją będzie saturacja całkowita i po niej będziemy w pierwszej kolejności sortować. W razie remisów wybieramy wierzchołek o większej saturacji wewnętrznej, gdyż później, gdy jego sąsiedzi mogą dostać kolejne kolory i będzie go ciężej pokolorować.
 
-	\subsection{Trzeci algorytm}
+	\subsubsection{Pseudokod}
+
+	\begin{algorithmic}
+		\State \textbf{Wejście:} graf $G$
+		\\
+		\State colored $\coloneqq 0$
+		\State max\_color $\coloneqq 0$ 
+		\\
+		\Function {Color}{$G$}
+			\State $c \coloneqq \left[\right]$
+			\State $s \coloneqq \left[\right]$
+			\\
+			\ForAll{$v \in V(G)$}
+				\State $c(v) = \varnothing$
+				\State $s(v) = \varnothing$
+			\EndFor
+			\\
+			\State $v \coloneqq rand(\left\{v \in V(G): \forall u \in V(G) \deg_{G} v \geq \deg_{G} u \right\})$
+			\State \Call {ColorVertex}{$v$, \&$c$, \&$s$}
+			\\
+			\While{colored $< p \cdot |V(G)|$}
+				\State $v \coloneqq rand(\left\{v \in V(G): \forall u \in V(G) S_{G} v \geq S_{G} u \right\})$
+				\State \Call {ColorVertex}{$v$, \&$c$, \&$s$}
+			\EndWhile
+			\\
+			\State \Return $(c, \text{max\_color})$
+		\EndFunction
+		\pagebreak
+		\Procedure {ColorVertex}{$v$, \&$c$, \&$s$}
+			\State color $\coloneqq 1$
+			\While{color $\in s(v)$}
+				\State color $\coloneqq$ color $+ 1$
+			\EndWhile
+			\State $c(v) = c(v) \cup \left\{\text{color}\right\}$
+			\State colored $\coloneqq$ colored $ + 1$
+			\\
+			\If{color $>$ max\_color}
+				\State max\_color $\coloneqq$ color
+			\EndIf
+			\\
+			\State $s(v) = s(v) \cup \left\{\text{color}\right\}$
+			\ForAll{$u \in N_{G}(v)$}
+				\State $s(v) = s(v) \cup \left\{\text{color}\right\}$
+			\EndFor
+		\EndProcedure
+	\end{algorithmic}
+
+	\subsection{Zmodyfikowany algorytm CS}
+	
+	Ostatnim algorytmem zaproponowanym przez zespół będzie zmodyfikowany algorytm podobny do algorytmu CS (\textit{ang. connected sequential}). Jego modyfikacja będzie polegała na tym, że w przypadku konieczności użycia koloru, zostanie uruchomiona procedura wymiany, bazująca na algorytmie wyznaczania permutacji Fishera-Yatesa.
+	\\~\\
+	Algorytm zakłada, że w przypadku braku dostępnego koloru z puli, będziemy po kolei iść wzdłuż pewnej ścieżki od naszego wierzchołka i próbować wymieniać kolory do momentu, gdy któryś z wierzchołków będzie się dało pokolorować użytymi już kolorami, albo gdy algorytm zakończy permutację. Nowego koloru użyjemy tylko w drugim przypadku. Aby zwiększyć skuteczność, będziemy sprawdzać wymianę wszystkich możliwych kolorów.
+	
+	\subsubsection{Pseudokod}
+	
+	\begin{algorithmic}
+		\State \textbf{Wejście:} graf $G$ \\
+		\State colored $\coloneqq 0$
+		\State max\_color $\coloneqq 0$
+		\\
+		\Function {Color}{$G$}
+			\State $c \coloneqq \left[\right]$
+			\ForAll{$v \in V(G)$}
+				\State $c(v) = \varnothing$
+			\EndFor
+			\\
+			\ForAll{$v \in V(G)$, $l \in \left\{1,...,p\right\}$}
+				\ForAll{color $\in \left\{1,...,\text{max\_color}\right\}$}
+					\If{color $\notin c\left[\left\{v\right\} \cup N_{G}(v) \right]$}
+						\State $c(v) \coloneqq c(v) \cup \left\{\text{color}\right\}$
+						\State \textbf{break}
+					\EndIf
+				\EndFor
+				\If{$\neg$\Call {ColorInterchange}{$v$, \&$G$, \&$c$}}
+					\State $c(v) \coloneqq c(v) \cup \left\{\text{color} + 1\right\}$
+					\State max\_color $\coloneqq$ max\_color $+ 1$
+				\EndIf
+			\EndFor
+			\State \Return $(c, \text{max\_color})$
+		\EndFunction
+		\\
+		\Procedure {ColorInterchange}{$v$, \&$G$, \&$c$}
+			\ForAll{$i \in {1,...,ANNEALING\_CONSTANT}$}
+				\State $u \coloneqq rand(N_{G}(v))$
+				\State $X = c(u) \cap c[N_{G}(v) - \left\{u\right\}]$
+				\ForAll{$x \in X$}
+					\ForAll{color $\in \left\{1,...,\text{max\_color}\right\}$}
+						\If{color $\notin c\left[\left\{u\right\} \cup N_{G}(u) \right]$}
+							\State $c(v) \coloneqq c(v) \cup \left\{x\right\}$
+							\State $c(u) \coloneqq c(u) - \left\{x\right\} \cup \left\{\text{color}\right\}$
+							\State \Return $true$
+						\EndIf
+					\EndFor
+				\EndFor
+				\State $v \coloneqq u$
+			\EndFor
+			\State \Return $false$
+		\EndProcedure
+	\end{algorithmic}	
 	
 	\section{Założenia techniczne}
 	
-	W wyborze języka, w którym zostanie stworzony program, zespół kierował się prostotą i przejrzystością implementacji, aby móc skupić się na teoretycznej części problemu. Ostatecznie, program zostanie napisany w języku Python - jest to bardzo prosty język, używany powszechnie do analizy złożonych algorytmów, posiadający duże wsparcie społeczności, bindingi do biblioteki graphviz (za pomocą której zespół chce zwizualizować wyniki działania algorytmów).
+	W wyborze języka, w którym zostanie stworzony program, zespół kierował się przejrzystością implementacji, aby móc skupić się na teoretycznej części problemu. Ostatecznie, program zostanie napisany w języku C\# - duży wpływ miał tutaj fakt, że był to jeden z niewielu języków, który jest dobrze znany obu członkom zespołu. Jest to język stosujący paradygmat programowania obiektowego, co pozwoli nam potraktować grafy w bardziej obrazowy sposób podczas implementacji. Dodatkowo, posiada duże wsparcie społeczności oraz bindingi do bibliotek wizualizujących grafy (m.in. Graphviz). Zaletą jest również większa prędkość obliczeń na maszynie wirtualnej .NET w stosunku do języków interpretowanych.
 	\\~\\
 	Projekt będzie obejmował:
 	\begin{itemize}
@@ -159,6 +309,13 @@
 		
 		\bibitem{kubale-book}
 		Marek Kubale, \textit{Optymalizacja dyskretna. Modele i metody kolorownia grafów}, WNT 2002
+		
+		\bibitem{radin-thesis}
+		Andrew Radin, \textit{Graph coloring heuristics from investigation ofsmallest hard to color graphs}, RIT Scholar Works 2000
+		\url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.867.178\&rep=rep1\&type=pdf}
+		\textit{(dostęp: \today)}
+		
+		
 	\end{thebibliography}
 	
 
