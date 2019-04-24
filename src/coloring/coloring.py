@@ -24,6 +24,14 @@ import copy
 import random
 
 
+__all__ = [
+    'amis_fold_color',
+    'total_dsatur_fold_color',
+    'outer_dsatur_fold_color',
+    'cs_interchange_fold_color'
+]
+
+
 def amis_fold_color(graph, folds=1):
     """ Color properly a graph with n-folds using Approximate Maximum Independent Set
 
