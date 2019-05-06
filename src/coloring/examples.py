@@ -1,6 +1,5 @@
 import itertools
 import random
-import networkx as nx
 
 from coloring.graph import Graph
 
@@ -31,19 +30,9 @@ def kneser_graph(n, k):
     return g
 
 
-def random_erdos_renyi(n, m):
-    """Generate a random graph with n vertices and m edges using Erdős–Rényi model"""
-    nxg = nx.gnm_random_graph(n, m)
-    g = Graph()
-
-    for vertex in nx.nodes(nxg):
-        g.add_vertex(vertex)
-        g.vertices[vertex] = set(nx.neighbors(nxg, vertex))
-    return g
-
-
 def load_dimacs(file_path):
     """Load a graph in DIMACS format from a specified file"""
+
     def parse_problem_line(g, line, _):
         [_, _, n, m] = line.split(" ")
         for idx in range(1, int(n) + 1):

@@ -52,7 +52,7 @@ def test_accuracy():
     data = {column: [] for column in columns}
 
     fold_values = [2, 3, 5, 10]
-    graph_params = [(5, 2), (6, 2), (7, 3), (8, 2), (9, 4)]
+    graph_params = [(5, 2), (6, 2), (7, 3), (8, 3), (9, 4)]
 
     for folds in fold_values:
         for n, k in graph_params:
